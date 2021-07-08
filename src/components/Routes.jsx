@@ -17,7 +17,7 @@ function Routes(props) {
         <Router>
           <Switch>
             <Route exact path="/">
-              <TEMP />
+              <App setOpensOptions={setOpensOptions} />
             </Route>
             <Route path="/login">
               <Login />
@@ -25,8 +25,8 @@ function Routes(props) {
             <Route path="/register">
               <Register />
             </Route>
-            <Route path="/home">
-              <App setOpensOptions={setOpensOptions} />
+            <Route path="/switch">
+              <TEMP />
             </Route>
           </Switch>
         </Router>
