@@ -31,14 +31,12 @@ router.post("/api/register", (req, res) => {
 });
 
 router.post("/api/login", isUser, (req, res, next) => {
-  console.log(req.session);
   passport.authenticate("local", (err, user, info) => {
     if (err) throw err;
     if (!user) res.send({ status: 0 });
     else {
       req.logIn(user, (err) => {
         if (err) throw err;
-        console.log(res);
         res.send({ status: 200 });
       });
     }
