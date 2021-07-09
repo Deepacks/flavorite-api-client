@@ -14,13 +14,12 @@ function CardContainer(props) {
   const classes = useStyles();
   const [bookmarks, setBookmarks] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(true);
-  const [resser, setResser] = React.useState();
 
   React.useEffect(() => {
     if (props.python === true) {
       fetch("https://favbc.herokuapp.com/bookmarks", {
         method: "GET",
-      }).then((res) => setResser(res));
+      }).then((res) => setBookmarks(res));
     } else if (props.python === false) {
       const requestOptions = {
         method: "GET",
@@ -29,22 +28,16 @@ function CardContainer(props) {
       };
       fetch(process.env.REACT_APP_API_URL + "/bookmarks", requestOptions)
         .then((response) => response.json())
-        .then((data) => setResser(data));
+        .then((data) => {
+          if (data.status === 0) {
+            window.location.replace("/login");
+          } else {
+            setBookmarks(data);
+            setIsLoading(false);
+          }
+        });
     }
   }, [props.resListener, props.python]);
-
-  React.useEffect(() => {
-    if (resser) {
-      if (resser.status === 0) {
-        window.location.replace("/login");
-      } else {
-        setBookmarks(resser);
-        setIsLoading(false);
-      }
-    } else {
-      setIsLoading(true);
-    }
-  }, [resser]);
 
   return (
     <div

@@ -19,5 +19,11 @@ const isUser = (req, res, next) => {
   });
 };
 
+const isAlreadyAuth = (req, res, next) => {
+  if (req.isAuthenticated()) res.send({ auth: true });
+  else res.send({ auth: false });
+};
+
 module.exports.isAuth = isAuth;
 module.exports.isUser = isUser;
+module.exports.isAlreadyAuth = isAlreadyAuth;

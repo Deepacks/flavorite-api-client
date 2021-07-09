@@ -3,6 +3,7 @@ const passport = require("passport");
 const genPassword = require("../lib/passwordUtils").genPassword;
 const isAuth = require("../lib/userUtils").isAuth;
 const isUser = require("../lib/userUtils").isUser;
+const isAlreadyAuth = require("../lib/userUtils").isAlreadyAuth;
 const Bookmark = require("../models/BookmarkModel");
 const User = require("../models/UserModel");
 const Switch = require("../models/SwitchModel");
@@ -30,18 +31,23 @@ router.post("/api/register", (req, res) => {
   });
 });
 
-router.post("/api/login", isUser, (req, res, next) => {
-  passport.authenticate("local", (err, user, info) => {
-    if (err) throw err;
-    if (!user) res.send({ status: 0 });
-    else {
-      req.logIn(user, (err) => {
-        if (err) throw err;
-        res.send({ status: 200 });
-      });
-    }
-  })(req, res, next);
-});
+router
+  .route("/api/login")
+
+  .get(isAlreadyAuth)
+
+  .post(isUser, (req, res, next) => {
+    passport.authenticate("local", (err, user) => {
+      if (err) throw err;
+      if (!user) res.send({ status: 0 });
+      else {
+        req.logIn(user, (err) => {
+          if (err) throw err;
+          res.send({ status: 200 });
+        });
+      }
+    })(req, res, next);
+  });
 
 router.get("/api/logout", (req, res) => {
   req.logOut();
@@ -54,16 +60,16 @@ router
   .route("/api/bookmarks")
 
   .get(isAuth, (req, res) => {
-    Bookmark.find({})
-      .then((bookmarks) => {
-        res.send(bookmarks);
-      })
-      .catch((err) => console.log("err:" + err));
+    Bookmark.find({ userId: req.session.passport.user }, (err, docs) => {
+      if (!err) res.send(docs);
+      else res.send(err).statusCode(500);
+    });
   })
 
   .post((req, res) => {
     const newBookmark = new Bookmark({
       id: "666",
+      userId: req.session.passport.user,
       title: req.body.title,
       image:
         "https://www.google.com/s2/favicons?sz=64&domain_url=" + req.body.url,

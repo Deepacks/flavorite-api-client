@@ -80,16 +80,26 @@ const useStyles = makeStyles((theme) => ({
 
 function Login() {
   const classes = useStyles();
-  const [resStatus, setResStatus] = React.useState({
-    data: {
-      status: undefined,
-    },
-  });
   const [warning, setWarning] = React.useState("");
   const [fieldsValue, setFieldsValue] = React.useState({
     username: "",
     password: "",
   });
+
+  // check if user already logged in on load
+  React.useEffect(() => {
+    const requestOptions = {
+      method: "GET",
+      credentials: "include",
+      headers: { "Content-Type": "application/json" },
+      referrerPolicy: "no-referrer",
+    };
+    fetch(process.env.REACT_APP_API_URL + "/login", requestOptions)
+      .then((response) => response.json())
+      .then((data) => {
+        if (data.auth) window.location.replace("/");
+      });
+  }, []);
 
   function handleChange(event) {
     const { value, name } = event.target;
@@ -111,19 +121,15 @@ function Login() {
     };
     fetch(process.env.REACT_APP_API_URL + "/login", requestOptions)
       .then((response) => response.json())
-      .then((data) => setResStatus(data));
+      .then((data) => {
+        if (data.status === 0) {
+          setWarning("Incorrect username or password ");
+        } else if (data.status === 200) {
+          setWarning("");
+          window.location.replace("/");
+        }
+      });
   };
-
-  React.useEffect(() => {
-    if (resStatus) {
-      if (resStatus.status === 0) {
-        setWarning("Incorrect username or password ");
-      } else if (resStatus.status === 200) {
-        setWarning("");
-        window.location.replace("/");
-      }
-    }
-  }, [resStatus]);
 
   return (
     <div className={classes.containerStyle}>

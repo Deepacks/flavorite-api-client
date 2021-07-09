@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const BookmarkSchema = {
   id: String,
+  userId: String,
   title: String,
   image: String,
   url: String,

@@ -71,7 +71,6 @@ const useStyles = makeStyles((theme) => ({
 
 function Register() {
   const classes = useStyles();
-  const [resStatus, setResStatus] = React.useState();
   const [warning, setWarning] = React.useState("");
   const [fieldsValue, setFieldsValue] = React.useState({
     username: "",
@@ -91,7 +90,7 @@ function Register() {
 
   const handleLogin = () => {
     if (fieldsValue.password !== fieldsValue.check) {
-      setResStatus({ status: 0 });
+      setWarning("Passwords do not match");
       setFieldsValue((prevValue) => {
         return {
           username: prevValue.username,
@@ -112,22 +111,16 @@ function Register() {
       };
       fetch(process.env.REACT_APP_API_URL + "/register", requestOptions)
         .then((response) => response.json())
-        .then((data) => setResStatus(data));
+        .then((data) => {
+          if (data.status === 1) {
+            setWarning("Email is invalid or already taken");
+          } else if (data.status === 200) {
+            setWarning("");
+            window.location.replace("/login");
+          }
+        });
     }
   };
-
-  React.useEffect(() => {
-    if (resStatus) {
-      if (resStatus.status === 0) {
-        setWarning("Passwords do not match");
-      } else if (resStatus.status === 1) {
-        setWarning("Email is invalid or already taken");
-      } else if (resStatus.status === 200) {
-        setWarning("");
-        window.location.replace("/login");
-      }
-    }
-  }, [resStatus]);
 
   return (
     <div className={classes.containerStyle}>
