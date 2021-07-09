@@ -120,7 +120,7 @@ function Login() {
         setWarning("Incorrect username or password ");
       } else if (resStatus.status === 200) {
         setWarning("");
-        window.location.replace("/home");
+        window.location.replace("/");
       }
     }
   }, [resStatus]);
