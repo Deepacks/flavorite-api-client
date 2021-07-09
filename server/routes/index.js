@@ -4,31 +4,36 @@ const genPassword = require("../lib/passwordUtils").genPassword;
 const isAuth = require("../lib/userUtils").isAuth;
 const isUser = require("../lib/userUtils").isUser;
 const isAlreadyAuth = require("../lib/userUtils").isAlreadyAuth;
+const registerChecks = require("../lib/userUtils").registerChecks;
 const Bookmark = require("../models/BookmarkModel");
 const User = require("../models/UserModel");
 const Switch = require("../models/SwitchModel");
 
 // -------------- AUTHENTICATION --------------
 
-router.post("/api/register", (req, res) => {
-  User.findOne({ username: req.body.username }, async (err, user) => {
-    if (err) throw err;
-    if (user) res.send({ status: 1 });
-    else {
-      const genSaltHash = genPassword(req.body.password);
+router.post("/api/register", registerChecks, (req, res, next) => {
+  const genSaltHash = genPassword(req.body.password);
 
-      const hash = genSaltHash.hash;
-      const salt = genSaltHash.salt;
+  const hash = genSaltHash.hash;
+  const salt = genSaltHash.salt;
 
-      const newUser = new User({
-        username: req.body.username,
-        hash: hash,
-        salt: salt,
-      });
-      await newUser.save();
-      res.send({ status: 200 });
-    }
+  const newUser = new User({
+    username: req.body.username,
+    hash: hash,
+    salt: salt,
   });
+  newUser.save(() =>
+    passport.authenticate("local", (err, user) => {
+      if (err) throw err;
+      if (!user) res.send({ status: 0 });
+      else {
+        req.logIn(user, (err) => {
+          if (err) throw err;
+          res.send({ status: 200 });
+        });
+      }
+    })(req, res, next)
+  );
 });
 
 router

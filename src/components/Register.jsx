@@ -116,7 +116,7 @@ function Register() {
             setWarning("Email is invalid or already taken");
           } else if (data.status === 200) {
             setWarning("");
-            window.location.replace("/login");
+            window.location.replace("/");
           }
         });
     }
